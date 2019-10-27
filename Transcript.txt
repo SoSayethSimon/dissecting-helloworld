@@ -1,0 +1,94 @@
+Hello everybody and thanks for joining me in this Quickie Session! For the next 15 minutes i will show you
+a little bit of the odd and ends you can find in a simple HelloWorld application both in Java and in Kotlin.
+
+Of course you might ask yourself, why this could even be remotely interesting. Well, instead of just looking
+at the code, we will also take a look at the bytecode. And as it turns out both languages produce a heck of
+a different bytecode to produce the same result. So, before we get started i'm a little bit curious: who, out
+of this room, has already taken a look at the Java bytecode of HelloWorld? And who did the same for Kotlin?
+As expected, most haven't seen both, so this session should include some interesting findings for you.
+
+But before we get started, a few words about myself. I'm Simon Schell, seven years Developer at the Provinzial
+Rheinland and since last year also co-founder of my own little startup. I love to learn different languages
+and never concentrated too much on a single one, but most of my experience is based in Java, Typescript and
+Kotlin. And that's exactly the reason why i enjoyed taking a look at what those languages do behind the scenes.
+So here is what we will talk about:
+
+First of all, most of you probably know the role of bytecode in the JVM, so i will keep it short. It works as
+an intermediary between our high-level code and the low-level instructions for the JVM. The easiest way to take
+a look at the bytecode level is to use javap on our generated class files. A typical output would look like this.
+As you can see, i've been using JDK 11 with major version 55 for my examples. The Kotlin examples on the other hand
+are in major version 52, so a few differences are to be expected right from the get go. For the sake of keeping 
+this talk concise, i've done a little cleanup and will show you only the relevant parts. This will look a little 
+bit something like this - here you can see some typical instructions like... which are used for... Later on we will
+take a look at the verbose output to take a closer look at the constant pool, which will look like this.
+
+Now starting with Java. I hope everybody here has already seen this. Otherwise i would question why you are
+attending this conference. But before we switch to the Bytecode, let's have a look at what we should expect
+to find in our class files. First off we have a class declaration, which means we also got a default constructor.
+Then there is the main function. It's static, so we would also expect to find this flag in the Bytecode. 
+Then there is a String literal and the constant PrintStream System.out. So far so good.
+
+Looking at the bytecode i would recommend the verbose view, as it provides additional information about the constant
+pool and args. Just add -v or -verbose to the javap command. Considering how small our HelloWorld application is, you
+might be surprised that there are already over 30 entries in the constant pool. The entries i want to have a look at
+are number 1, 2, 3, 4, 6. Constant number 3 is our String instance containing the literal at entry number 23: Hello
+Java! Entries number 2 and 4 are the System out PrintStream and the method reference for our println method. So we
+already found a good bunch of the elements we were searching for, just by taking a look at the constant pool. But why
+take a look at entry 1 and 6? Well, keep them in mind - entry 1 is ...
+
+Going further we can take a look at the disassembled code. For overview purposes the output you see here is just the
+simplified output, not the verbose one. As you might have suspected we got two blocks declared in this class file: our
+main method and the generated default constructor. This will get more relevant later on. As you can see our default
+constructor calls our method ref of Object <init> to initialize our HelloWorld Object. Our main method on the other
+hand simply loads our PrintStream from entry number 2, followed by our String at entry number 3 and invokes our method
+ref of println. That's all there is to it. Interesting enough by itself, but not outstandingly surprising.
+
+So why should we stop there? Doing the same in Kotlin is just as easy, so let's get right into it. First things first,
+i have to mention that there are multiple ways we could write Hello World in Kotlin. And every single variant generates
+different bytecode. Yeah... so i've decided to start with the most similar example. The reason is very simple: we will
+condense the differences to the inner workings of the languages and ignore most of the syntactic sugar. As you can see
+this example also looks pretty similar to the Java code in it's raw form. I've even used the same System PrintStream
+instead of the native Kotlin functions. But there is one big difference: we don't see any class declaration. This works
+fine with Kotlin.
+
+So let's take a look at the list of things we expected from our Java example.
+A class declaration, a default constructor, a static main function, a string literal, a PrintStream instance. Let's go
+and add the Object init method call to this list, as we found it in our Bytecode even though it might not be as obvious.
+Well, can anybody guess, what parts of this list will be missing in Kotlin? For those of you who might have gotten 
+excited that Kotlin lives without the class declaration, i have bad news: we will find one generated for us. But this
+generated class does have some interesting features: it leaves away both the default constructor and Object init method
+call. Instead we will find a bunch of other stuff.
+
+But where exactly do we find our Bytecode this time around - in case we haven't defined a class on our own, Kotlin will
+simply generate a class file with the kotlin filename and the suffix 'Kt' as it's filename, so in this case HelloWorldKt.
+And the first thing you might notice if you inspect this class file, is the enormous constant pool with over 50 entries.
+All for the sake of a HelloWorld application. But why? Well, we can find our main culprit right at the bottom of our output.
+One giant RuntimeVisibleAnnotation - the infamous Metadata Annotation. For those working with Kotlin, who already saw
+that annotation? And who knows what it does? Keeping it short, it contains a bunch of additional information for the Kotlin
+compiler. But a few of those informations are also interesting for understanding the inner workings. The entries number 38
+and 39 define the "kind" of metadata contained in this annotation: in our case it's kind number 2 which translates to file
+metadata. The other kinds would be class, synthetic class, multi-file class facade and multi-file class part. Each kind
+is treated differently by the intrinsics as you might expect and our file kind is one of the flags responsible for the
+automatic class generation.
+
+Further down in our disassembled code we find only one method this time around: exactly the main function we defined
+ourselves. No default constructor, no object init. This was probably the biggest surprise for me when i first took a look
+at this example. The aload_0 instruction moved from the constructor to our main function, but our generated class is
+actually never instantiated. Instead we get some additional Kotlin intrinsics, such as the invocation of 
+checkParameterIsNotNull for our args parameter. A short look at the verbose output also reveals, that the NotNull
+annotation was added as a RuntimeInvisibleParameterAnnotation. 
+
+Shaking things up for a bit, let's also have a look at an alternative HelloWorld. In this example our main function forgos
+the args parameter and uses the native Kotlin println function. On Bytecode level these changes are reflected by the creation
+of a proxy method, which simply invokes our own main method. You might also notice, that in this case we don't have any
+NotNull annotation as the Kotlin compiler notices the irrelevance for this case. The println function on the other hand
+causes a small change in the general application flow as it loads a single constant zero before the invocation of the
+PrintStream method. I haven't been able to figure out the meaning of this zero yet, if you've got a clue let's have a chat
+afterwards.
+
+So all in all, what do we take away from all this. Well, the main point is - even a simple HelloWorld is worth diving to
+find some of the internal magic. As you might expect those examples are just the tip of the iceberg. Given more time i
+want to create a longer session with more in depth examples, but of course everybody here is free to explore the same.
+This direct comparison and analysis on bytecode level helped me a lot in understanding some of the core concepts of both
+languages. And i hope you can say the same about these 15 minutes. So if you have enjoyed this session please don't forget
+to rate me. And if you have any questions you can contact me through either of these channels. Thanks for listening and so long!

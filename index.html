@@ -6,12 +6,11 @@
 
 		<title>reveal.js</title>
 
-		<link rel="stylesheet" href="css/reset.css">
 		<link rel="stylesheet" href="css/reveal.css">
-		<link rel="stylesheet" href="css/theme/black.css">
+		<link rel="stylesheet" href="css/theme/devoxx.css">
 
 		<!-- Theme used for syntax highlighting of code -->
-		<link rel="stylesheet" href="lib/css/monokai.css">
+		<link rel="stylesheet" href="plugin/highlight/styles/agate.css">
 
 		<!-- Printing and PDF exports -->
 		<script>
@@ -24,12 +23,428 @@
 	</head>
 	<body>
 		<div class="reveal">
-			<div class="slides">
-				<section>Slide 1</section>
-				<section>Slide 2</section>
+			<div class="slides center-slides">
+				<section class="deckblatt">
+					<div class="signet-top"><img data-src="images/deckblatt-java-deco-top.svg"></div>
+					<div class="signet-intro"><img data-src="images/deckblatt-content.svg"></div>
+					<div class="signet-bottom"><img data-src="images/deckblatt-kotlin-deco-bottom.svg"></div>
+					<aside class="notes">
+						Hello everybody and thanks for joining me in this Quickie Session! 
+						For the next 15 minutes i will show you a little bit of the odd and 
+						ends you can find in a simple HelloWorld application both in Java and in Kotlin.
+					</aside>
+				</section>
+				<section>
+					<div class="signet-top"><img data-src="images/java-deco-top.svg"></div>
+					<div class="signet-bottom"><img data-src="images/kotlin-deco-bottom.svg"></div>
+					<div class="content">
+						<img data-src="images/hello-world.svg">
+					</div>
+					<aside class="notes">
+						Of course you might ask yourself, why this could even be remotely interesting. 
+						Well, instead of just looking at the code, we will also take a look at the 
+						bytecode. And as it turns out both languages produce a heck of a different 
+						bytecode to produce the same result. So, before we get started i'm a little 
+						bit curious: who, out of this room, has already taken a look at the Java 
+						bytecode of HelloWorld? And who did the same for Kotlin? As expected, most 
+						haven't seen both, so this session should include some interesting findings for you.
+					</aside>
+				</section>
+				<section>
+					<div class="signet-top"><img data-src="images/java-deco-top.svg"></div>
+					<div class="signet-bottom"><img data-src="images/kotlin-deco-bottom.svg"></div>
+					<div class="me-and-myself">
+						<div class="thats-me">
+							<ul>
+								<li>Simon Schell</li>
+								<li>Java, Kotlin, Typescript</li>
+								<li>Provinzial Rheinland, Solt</li>
+						</div>
+						<div class="my-picture"><img data-src="images/profilbild.jpg"></div>
+					</div>
+					<aside class="notes">
+						But before we get started, a few words about myself. I'm Simon Schell, seven 
+						years Developer at the Provinzial Rheinland and since last year also co-founder 
+						of my own little startup. I love to learn different languages and never 
+						concentrated too much on a single one, but most of my experience is based in 
+						Java, Typescript and Kotlin. And that's exactly the reason why i enjoyed taking 
+						a look at what those languages do behind the scenes. So here is what we will 
+						talk about:
+					</aside>
+				</section>
+				<section>
+					<div class="signet-top"><img data-src="images/java-deco-top.svg"></div>
+					<div class="signet-bottom"><img data-src="images/kotlin-deco-bottom.svg"></div>
+					<div class="content">
+						<span  class="fragment step-fade-in-then-out" data-autoslide=0>
+							<img data-src="images/role-of-bytecode.svg">
+						</span>
+						<span class="fragment">
+								<pre class="highlight Java"><code class="hljs">
+	public final class com.javaexamples.HelloWorld
+	minor version: 0
+	major version: 55
+	flags: ACC_PUBLIC, ACC_FINAL, ACC_SUPER
+								</code></pre>
+						</span>
+						<span class="fragment">
+								<pre class="highlight Java"><code class="hljs">
+	Code:
+		stack=2, locals=1, args_size=1
+			0: aload_0
+			1: ldc           #9
+								</code></pre>
+						</span>
+					</div>
+					<aside class="notes">
+						First of all, most of you probably know the role of bytecode in the JVM, 
+						so i will keep it short. It works as an intermediary between our high-level 
+						code and the low-level instructions for the JVM. The easiest way to take
+						a look at the bytecode level is to use javap on our generated class files. 
+						A typical output would look like this. As you can see, i've been using 
+						JDK 11 with major version 55 for my examples. The Kotlin examples on the 
+						other hand are in major version 52, so a few differences are to be expected 
+						right from the get go. For the sake of keeping this talk concise, i've done 
+						a little cleanup and will show you only the relevant parts. This will look 
+						a little bit something like this - here you can see some typical 
+						instructions like aload_0 and ldc which are used for loading a local variable
+						or putting a constant from the constant pool on the stack. Later on we wil take 
+						a look at the verbose output to take a closer look at the constant pool, which 
+						will look like this.
+					</aside>
+				</section>
+				<section>
+					<div class="signet-top"><img data-src="images/java-deco-top.svg"></div>
+					<div class="signet-bottom"><img data-src="images/kotlin-deco-bottom.svg"></div>
+					<div class="content">
+						<span class="fragment">
+							<pre class="highlight Java"><code class="hljs">
+package com.javaexamples;
+
+public final class HelloWorld {
+    public static void main(String[] args) {
+        System.out.println("Hello Java!");
+    }
+}
+							</code></pre>
+						</span>
+					</div>
+					<aside class="notes">
+						Now starting with Java. I hope everybody here has already seen this. Otherwise 
+						i would question why you are attending this conference. But before we switch 
+						to the Bytecode, let's have a look at what we should expect to find in our class 
+						files. First off we have a class declaration, which means we also got a default 
+						constructor. Then there is the main function. It's static, so we would also 
+						expect to find this flag in the Bytecode. Then there is a String literal and 
+						the constant PrintStream System.out. So far so good.
+					</aside>
+				</section>
+
+				<section>
+					<div class="signet-top"><img data-src="images/java-deco-top.svg"></div>
+					<div class="signet-bottom"><img data-src="images/kotlin-deco-bottom.svg"></div>
+					<div class="content">
+						<span class="fragment">
+							<pre class="highlight Java"><code class="hljs">
+javap -v HelloWorld.class
+							</code></pre>
+						</span>
+						<span class="fragment">
+							<pre class="highlight Java"><code class="hljs">
+public final class com.javaexamples.HelloWorld
+  minor version: 0
+  major version: 55
+  flags: ACC_PUBLIC, ACC_FINAL, ACC_SUPER
+Constant pool:
+   #1 = Methodref          #6.#20         
+   	// java/lang/Object."&lt;init&gt;":()V
+   #2 = Fieldref           #21.#22        
+   	// java/lang/System.out:Ljava/io/PrintStream;
+   #3 = String             #23        // Hello Java!
+   #4 = Methodref          #24.#25        
+   	// java/io/PrintStream.println:(Ljava/lang/String;)V
+   #5 = Class              #26        // com/javaexamples/HelloWorld
+   #6 = Class              #27        // java/lang/Object
+							</code></pre>
+						</span>
+					</div>
+					<aside class="notes">
+						Looking at the bytecode i would recommend the verbose view, as it provides 
+						additional information about the constant pool and args. Just add -v or 
+						-verbose to the javap command. Considering how small our HelloWorld 
+						application is, you might be surprised that there are already over 30 entries 
+						in the constant pool. The entries i want to have a look at are number 1, 2, 
+						3, 4, 6. Constant number 3 is our String instance containing the literal at 
+						entry number 23: Hello Java! Entries number 2 and 4 are the System out 
+						PrintStream and the method reference for our println method. So we already 
+						found a good bunch of the elements we were searching for, just by taking a 
+						look at the constant pool. But why take a look at entry 1 and 6? Well, 
+						keep them in mind - entry 1 is ...
+					</aside>
+				</section>
+				<section>
+					<div class="signet-top"><img data-src="images/java-deco-top.svg"></div>
+					<div class="signet-bottom"><img data-src="images/kotlin-deco-bottom.svg"></div>
+					<div class="content">
+						<span class="fragment">
+							<pre class="highlight Java"><code class="hljs">
+public final class com.javaexamples.HelloWorld {
+  public com.javaexamples.HelloWorld();
+    Code:
+       0: aload_0
+       1: invokespecial #1                  
+	// Method java/lang/Object."&lt;init&gt;":()V
+       4: return
+
+  public static void main(java.lang.String[]);
+    Code:
+       0: getstatic     #2                  
+	// Field java/lang/System.out:Ljava/io/PrintStream;
+       3: ldc           #3  // String Hello Java!
+       5: invokevirtual #4                  
+	// Method java/io/PrintStream.println:(Ljava/lang/String;)V
+       8: return
+}
+							</code></pre>
+						</span>
+					</div>
+					<aside class="notes">
+						Going further we can take a look at the disassembled code. For overview 
+						purposes the output you see here is just the simplified output, not the 
+						verbose one. As you might have suspected we got two blocks declared in 
+						this class file: our main method and the generated default constructor. 
+						This will get more relevant later on. As you can see our default constructor 
+						calls our method ref of Object &lt;init&gt; to initialize our HelloWorld Object. 
+						Our main method on the other hand simply loads our PrintStream from entry 
+						number 2, followed by our String at entry number 3 and invokes our method
+						ref of println. That's all there is to it. Interesting enough by itself, 
+						but not outstandingly surprising.
+					</aside>
+				</section>
+				<section>
+					<div class="signet-top"><img data-src="images/java-deco-top.svg"></div>
+					<div class="signet-bottom"><img data-src="images/kotlin-deco-bottom.svg"></div>
+					<div class="content">
+						<span class="fragment">
+							<pre class="highlight Kotlin"><code class="hljs">
+fun main(args: Array&lt;String&gt;) {
+    System.out.println("Hello Kotlin!")
+}
+							</code></pre>
+						</span>
+					</div>
+					<aside class="notes">
+						So why should we stop there? Doing the same in Kotlin is just as easy, so let's 
+						get right into it. First things first, i have to mention that there are multiple 
+						ways we could write Hello World in Kotlin. And every single variant generates
+						different bytecode. Yeah... so i've decided to start with the most similar 
+						example. The reason is very simple: we will condense the differences to the 
+						inner workings of the languages and ignore most of the syntactic sugar. As you 
+						can see this example also looks pretty similar to the Java code in it's raw form. 
+						I've even used the same System PrintStream instead of the native Kotlin functions. 
+						But there is one big difference: we don't see any class declaration. This works
+						fine with Kotlin.
+					</aside>
+				</section>
+				<section data-autoslide="1">
+					<div class="signet-top"><img data-src="images/java-deco-top.svg"></div>
+					<div class="signet-bottom"><img data-src="images/kotlin-deco-bottom.svg"></div>
+					<div class="content">
+						<span  class="fragment step-fade-in-then-out" data-autoslide=0>
+							<img data-src="images/checklist-java.svg">
+						</span>
+						<span  class="fragment step-fade-in-then-out" data-autoslide=0>
+							<img data-src="images/checklist-kotlin.svg">
+						</span>
+					</div>
+					<aside class="notes">
+						So let's take a look at the list of things we expected from our Java example.
+						A class declaration, a default constructor, a static main function, a string literal, 
+						a PrintStream instance. Let's go and add the Object init method call to this list, as 
+						we found it in our Bytecode even though it might not be as obvious.	Well, can anybody 
+						guess, what parts of this list will be missing in Kotlin? For those of you who might 
+						have gotten excited that Kotlin lives without the class declaration, i have bad news: 
+						we will find one generated for us. But this	generated class does have some interesting 
+						features: it leaves away both the default constructor and Object init method call. 
+						Instead we will find a bunch of other stuff.
+					</aside>
+				</section>
+				<section>
+					<div class="signet-top"><img data-src="images/java-deco-top.svg"></div>
+					<div class="signet-bottom"><img data-src="images/kotlin-deco-bottom.svg"></div>
+					<div class="content">
+						<span class="fragment">
+							<pre class="highlight Kotlin"><code class="hljs">
+HelloWorldKt.class
+							</code></pre>
+						</span>
+						<span class="fragment">
+							<pre class="highlight Kotlin"><code class="hljs">
+SourceFile: "HelloWorld.kt"
+RuntimeVisibleAnnotations:
+  0: #31(#32=[I#33,I#33,I#34],
+  	#35=[I#33,I#36,I#37],
+	#38=I#39,#40=[s#41],
+	#42=[s#5,s#43,s#8,s#43,s#43,s#6,s#44])
+							</code></pre>
+						</span>
+						<span class="fragment">
+							<pre class="highlight Kotlin"><code class="hljs">
+#38 = Utf8               k
+#39 = Integer            2
+							</code></pre>
+						</span>
+					</div>
+					<aside class="notes">
+						But where exactly do we find our Bytecode this time around - in case we haven't defined 
+						a class on our own, Kotlin will simply generate a class file with the kotlin filename 
+						and the suffix 'Kt' as it's filename, so in this case HelloWorldKt. And the first thing 
+						you might notice if you inspect this class file, is the enormous constant pool with over 
+						50 entries. All for the sake of a HelloWorld application. But why? Well, we can find our 
+						main culprit right at the bottom of our output. One giant RuntimeVisibleAnnotation - 
+						the infamous Metadata Annotation. For those working with Kotlin, who already saw that 
+						annotation? And who knows what it does? Keeping it short, it contains a bunch of additional 
+						information for the Kotlin compiler. But a few of those informations are also interesting 
+						for understanding the inner workings. The entries number 38 and 39 define the "kind" of 
+						metadata contained in this annotation: in our case it's kind number 2 which translates to 
+						file metadata. The other kinds would be class, synthetic class, multi-file class facade 
+						and multi-file class part. Each kind is treated differently by the intrinsics as you might 
+						expect and our file kind is one of the flags responsible for the automatic class generation.
+					</aside>
+				</section>
+				<section>
+					<div class="signet-top"><img data-src="images/java-deco-top.svg"></div>
+					<div class="signet-bottom"><img data-src="images/kotlin-deco-bottom.svg"></div>
+					<div class="content">
+						<span  class="fragment step-fade-in-then-out" data-autoslide=0>
+							<pre class="widescreen highlight Kotlin"><code class="hljs">
+public final class com.kotlinexamples.HelloWorldKt {
+  public static final void main(java.lang.String[]);
+    Code:
+       0: aload_0
+       1: ldc           #9                  // String args
+       3: invokestatic  #15                 
+	 // Method kotlin/jvm/internal/Intrinsics.checkParameterIsNotNull:
+	 // (Ljava/lang/Object;Ljava/lang/String;)V
+       6: getstatic     #21                 
+	 // Field java/lang/System.out:Ljava/io/PrintStream;
+       9: ldc           #23                 // String Hello Kotlin!
+      11: invokevirtual #29                 
+	 // Method java/io/PrintStream.println:(Ljava/lang/String;)V
+      14: return
+}
+							</code></pre>
+						</span>
+					</div>
+					<aside class="notes">
+						Further down in our disassembled code we find only one method this time around: exactly 
+						the main function we defined ourselves. No default constructor, no object init. This 
+						was probably the biggest surprise for me when i first took a look at this example. The 
+						aload_0 instruction moved from the constructor to our main function, but our generated 
+						class is actually never instantiated. Instead we get some additional Kotlin intrinsics, 
+						such as the invocation of checkParameterIsNotNull for our args parameter. A short look at 
+						the verbose output also reveals, that the NotNull annotation was added as a 
+						RuntimeInvisibleParameterAnnotation. 
+					</aside>
+				</section>
+				<section>
+					<div class="signet-top"><img data-src="images/java-deco-top.svg"></div>
+					<div class="signet-bottom"><img data-src="images/kotlin-deco-bottom.svg"></div>
+					<div class="content">
+						<span  class="fragment step-fade-in-then-out" data-autoslide=0>
+							<pre class="highlight Kotlin"><code class="hljs">
+fun main() { println("Hello Kotlin") }
+							</code></pre>
+						</span>
+						<span  class="fragment step-fade-in-then-out" data-autoslide=0>
+							<pre class="highlight Kotlin"><code class="hljs">
+public final class com.kotlinexamples.HelloWorld2Kt {
+  public static final void main();
+    Code:
+       0: ldc           #11   // String Hello Kotlin
+       2: astore_0
+       2: iconst_0
+       3: istore_1
+       4: getstatic     #15                 
+	    // Field java/lang/System.out:Ljava/io/PrintStream;
+		...
+
+  public static void main(java.lang.String[]);
+    Code:
+       0: invokestatic  #9 // Method main:()V
+       3: return
+}
+							</code></pre>
+						</span>
+					</div>
+					<aside class="notes">
+						Shaking things up for a bit, let's also have a look at an alternative HelloWorld. 
+						In this example our main function forgos the args parameter and uses the native 
+						Kotlin println function. On Bytecode level these changes are reflected by the 
+						creation of a proxy method, which simply invokes our own main method. You might 
+						also notice, that in this case we don't have any NotNull annotation as the Kotlin 
+						compiler notices the irrelevance for this case. The println function on the other 
+						hand causes a small change in the general application flow as it loads a single 
+						constant zero before the invocation of the PrintStream method. I haven't been able 
+						to figure out the meaning of this zero yet, if you've got a clue let's have a chat
+						afterwards.
+					</aside>
+				</section>
+				<section>
+					<div class="signet-top"><img data-src="images/java-deco-top.svg"></div>
+					<div class="signet-bottom"><img data-src="images/kotlin-deco-bottom.svg"></div>
+					<div class="content">
+						<img data-src="images/hello-world-dissected.svg">
+					</div>
+					<aside class="notes">
+						So all in all, what do we take away from all this. Well, the main point is - even 
+						a simple HelloWorld is worth diving to find some of the internal magic. As you 
+						might expect those examples are just the tip of the iceberg. Given more time i
+						want to create a longer session with more in depth examples, but of course everybody 
+						here is free to explore the same. This direct comparison and analysis on bytecode 
+						level helped me a lot in understanding some of the core concepts of both languages. 
+						And i hope you can say the same about these 15 minutes.
+					</aside>
+				</section>
+				<section>
+					<img data-src="images/PleaseRateMe.png">
+					<aside class="notes">
+						So if you have enjoyed this session please don't forget to rate me.
+					</aside>
+				</section>
+				<section>
+					<div class="signet-top"><img data-src="images/java-deco-top.svg"></div>
+					<div class="signet-bottom"><img data-src="images/kotlin-deco-bottom.svg"></div>
+					<div class="content">
+						<img data-src="images/endfolie.svg">
+					</div>
+					<aside class="notes">
+						Thank you for your attention!
+					</aside>
+				</section>
+				<section>
+					<div class="signet-top"><img data-src="images/java-deco-top.svg"></div>
+					<div class="signet-bottom"><img data-src="images/kotlin-deco-bottom.svg"></div>
+					<div class="me-and-myself">
+						<div class="thats-me">
+							<ul>
+								<li>Email: simonschell@solt-it.com</li>
+								<li>Twitter: @SoSayethSimon</li>
+								<li>Github: SoSayethSimon</li>
+								<li>Repo: https://github.com/SoSayethSimon/dissecting-helloworld</li>
+							</ul>
+						</div>
+						<div class="my-picture"><img data-src="images/hello-world.svg"></div>
+					</div>
+					<aside class="notes">
+						And if you have any questions you can contact me through either of these channels. 
+						Thanks for listening and so long!
+					</aside>
+				</section>
 			</div>
 		</div>
 
+		<script src="lib/js/head.min.js"></script>
 		<script src="js/reveal.js"></script>
 
 		<script>
@@ -41,9 +456,13 @@
 					{ src: 'plugin/markdown/marked.js' },
 					{ src: 'plugin/markdown/markdown.js' },
 					{ src: 'plugin/notes/notes.js', async: true },
-					{ src: 'plugin/highlight/highlight.js', async: true }
-				]
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
+				],
+				transition: 'none'
 			});
+			Reveal.addEventListener( 'slidechanged', function( event ) {
+				Reveal.nextFragment();
+			} );
 		</script>
 	</body>
 </html>

@@ -1,0 +1,79 @@
+@font-face {
+font-family: "Exo Regular";
+src: url("Exo-Regular.ttf");
+}
+
+Body {
+background-color: #1a1738;
+display: flex;
+align-items: center;
+justify-content: space-between;
+padding: 20vh 10vw;
+}
+
+Schrift {
+color: #ccc;
+font-family: "Exo Regular";
+}
+
+Schrift Folieninfo oben und unten {
+color: #4e789b;
+}
+
+Schrift Folieninfo oben {
+position: absolute;
+top: 3vw;
+right: 3vw;
+text-align: right;
+}
+
+Schrift Folieninfo unten {
+position: absolute;
+bottom: 3vw;
+left: 3vw;
+text-align: left;
+}
+
+Deckblatt Java Deco Top {
+position: absolute;
+top: 0;
+left: 0;
+width: 53vw;
+height: auto;
+z-index: 5;
+}
+
+Deckblatt Kotlin Deco Bottom {
+position: absolute;
+bottom: 0;
+right: 0;
+width: 50vw;
+height: auto;
+z-index: 5;
+}
+
+Deckblatt content {
+position: static;
+align-self: center;
+z-index: 10;
+}
+
+Java Deco Top {
+position: absolute;
+top: 0;
+left: 0;
+height: 20vh;
+z-index: 5;
+}
+
+Kotlin Deco Bottom {
+position: absolute;
+bottom: 0;
+right: 0;
+height: 20vh;
+z-index: 5;
+}
+
+Grafiken die alleine auf Folie stehen {
+align-self: center;
+}
