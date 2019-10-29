@@ -179,7 +179,8 @@ Constant pool:
 						PrintStream and the method reference for our println method. So we already 
 						found a good bunch of the elements we were searching for, just by taking a 
 						look at the constant pool. But why take a look at entry 1 and 6? Well, 
-						keep them in mind - entry 1 is ...
+						keep them in mind - entry 1 is is the method ref of Object.init, the method for
+						initializing a raw object that was created before with the new keyword.
 					</aside>
 				</section>
 				<section>
@@ -341,7 +342,7 @@ public final class com.kotlinexamples.HelloWorldKt {
 						the main function we defined ourselves. No default constructor, no object init. This 
 						was probably the biggest surprise for me when i first took a look at this example. The 
 						aload_0 instruction moved from the constructor to our main function, but our generated 
-						class is actually never instantiated. Instead we get some additional Kotlin intrinsics, 
+						class is actually unable to be initialized. Instead we get some additional Kotlin intrinsics, 
 						such as the invocation of checkParameterIsNotNull for our args parameter. A short look at 
 						the verbose output also reveals, that the NotNull annotation was added as a 
 						RuntimeInvisibleParameterAnnotation. 
