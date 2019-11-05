@@ -80,6 +80,11 @@
 							<img data-src="images/role-of-bytecode.svg">
 						</span>
 						<span class="fragment">
+							<pre class="highlight Java"><code class="hljs">
+javap -v HelloWorld.class
+							</code></pre>
+						</span>
+						<span class="fragment">
 								<pre class="highlight Java"><code class="hljs">
 	public final class com.javaexamples.HelloWorld
 	minor version: 0
@@ -146,11 +151,6 @@ public final class HelloWorld {
 					<div class="content">
 						<span class="fragment">
 							<pre class="highlight Java"><code class="hljs">
-javap -v HelloWorld.class
-							</code></pre>
-						</span>
-						<span class="fragment">
-							<pre class="highlight Java"><code class="hljs">
 public final class com.javaexamples.HelloWorld
   minor version: 0
   major version: 55
@@ -169,9 +169,7 @@ Constant pool:
 						</span>
 					</div>
 					<aside class="notes">
-						Looking at the bytecode i would recommend the verbose view, as it provides 
-						additional information about the constant pool and args. Just add -v or 
-						-verbose to the javap command. Considering how small our HelloWorld 
+						Considering how small our HelloWorld 
 						application is, you might be surprised that there are already over 30 entries 
 						in the constant pool. The entries i want to have a look at are number 1, 2, 
 						3, 4, 6. Constant number 3 is our String instance containing the literal at 
